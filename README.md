@@ -1,2 +1,2 @@
 # GNSSseg
-Homogeneization of GNSS series
+Homogeneization of GNSS series.
