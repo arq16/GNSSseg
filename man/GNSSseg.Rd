@@ -5,25 +5,29 @@
 \title{Homogeneization of GNSS series}
 \usage{
 GNSSseg(Data, lyear = 365.25, lmin = 1, Kmax = NULL,
-  selection.K = "mBIC", S = 0.75, selection.f = FALSE,
-  threshold = 0.05)
+  selection.K = "mBIC", S = 0.75, f = TRUE, selection.f = FALSE,
+  threshold = 0.05, tol = 1e-04)
 }
 \arguments{
 \item{Data}{a data frame, with size [n x 2], containing the signal (e.g. the daily GPS-ERAI series for GNSS) and the dates (in format yyyy-mm-dd of type "calendar time" (class POSIXct))}
 
 \item{lyear}{the length of the year in the signal. Defalut is 365.25}
 
-\item{lmin}{the minimum length of the segments. Defalut is 1}
+\item{lmin}{the minimum length of the segments. Default is 1}
 
 \item{Kmax}{the maximal number of segments (must be lower than n). Default is [n/2 log(n)]}
 
-\item{selection.K}{a name indicating the model selection criterion to select the number of segments K (\code{mBIC}, \code{ML}, \code{BM_BJ} or \code{BM_slope}). \code{"none"} indicates that no selection is claimed and the procedure considers \code{Kmax} segments or \code{Kmax}-1 changes. If \code{selection.K=All}, the results for the four possible criteria are given. Default is \code{"mBIC"}}
+\item{selection.K}{a name indicating the model selection criterion to select the number of segments K (\code{mBIC}, \code{ML}, \code{BM_BJ} or \code{BM_slope}). \code{"none"} indicates that no selection is claimed and the procedure considers \code{Kmax} segments or \code{Kmax}-1 changes. If \code{selection.K="All"}, the results for the four possible criteria are given. Default is \code{"mBIC"}}
 
 \item{S}{the threshold used in the ML criterion. Default is 0.75}
+
+\item{f}{a boolean indicating if the functional part is taking into account for in the model. Default is FALSE}
 
 \item{selection.f}{a boolean indicating if a selection on the functions of the Fourier decomposition of order 4 is performed. Default is FALSE}
 
 \item{threshold}{a numeric value lower than 1. Default is 0.05}
+
+\item{tol}{the stopping rule for the iterative procedure. Default is 1e-4}
 }
 \value{
 A file containing
@@ -49,6 +53,7 @@ The inference procedure consists for a fixed number of segments K in first estim
 \item If \code{selection.K="none"} the procedure is performed with \code{Kmax} segments.
 \item Missing data in the signal are accepted.
 }
+Note that if \code{f=FALSE}, only a segmentation is performed.
 }
 \examples{
 data(Data)
