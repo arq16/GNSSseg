@@ -1,7 +1,7 @@
 
 ###################################
 # General Loop
-loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,threshold=0.05){
+loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,threshold,tol){
   result  = list()
   n       = dim(Data)[1]
   SSwg    = c()
@@ -10,7 +10,7 @@ loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,thresho
 
   for (k in (1:Kmax)){
     res.segfunct=c()
-    request=paste(paste0("res.segfunct=",Used.function,'(Data,k,lmin,lyear,threshold)'),sep="")
+    request=paste(paste0("res.segfunct=",Used.function,'(Data,k,lmin,lyear,threshold,tol)'),sep="")
     eval(parse(text=request))
     SSwg[k]=res.segfunct$SSwg
     loglik[k]=-(n/2)*(log(2*pi))-(1/2)*(sum(log(res.segfunct$var.est.t)))-(1/2)*SSwg[k]

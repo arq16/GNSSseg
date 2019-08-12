@@ -1,7 +1,7 @@
 
 ###################################
 ######## Inference procedure for a fixed K
-Seg_funct_totK <-function(Data,K,lmin,lyear,threshold=FALSE){
+Seg_funct_totK <-function(Data,K,lmin,lyear,threshold,tol){
   sigma.est.month=RobEstiMonthlyVariance(Data)
   var.est.k=sigma.est.month^2
   var.est.t=c()
@@ -13,7 +13,6 @@ Seg_funct_totK <-function(Data,K,lmin,lyear,threshold=FALSE){
   segmentation=SegMonthlyVarianceK(auxiliar_data,K,lmin,var.est.t)
 
   maxIter = 100
-  tol     = 1e-4
   Diff    = 2*tol
   Iter=0
 
@@ -63,7 +62,7 @@ Seg_funct_totK <-function(Data,K,lmin,lyear,threshold=FALSE){
 }
 
 
-Seg_funct_selbK <-function(Data,K,lmin=1,lyear,threshold=0.05){
+Seg_funct_selbK <-function(Data,K,lmin=1,lyear,threshold,tol){
   sigma.est.month=RobEstiMonthlyVariance(Data)
   var.est.k=sigma.est.month^2
   var.est.t=c()
@@ -75,7 +74,6 @@ Seg_funct_selbK <-function(Data,K,lmin=1,lyear,threshold=0.05){
   segmentation=SegMonthlyVarianceK(auxiliar_data,K,lmin,var.est.t)
 
   maxIter = 100
-  tol     = 1e-4
   Diff  = 2*tol
   Iter  = 0
 
@@ -155,9 +153,12 @@ SegMonthlyVarianceK=function(Data,K,lmin,var.est.t){
   Tmu=FormatOptSegK(out$t.est[K,1:K],Data,var.est.t)
   mean.est.t  = rep(Tmu$mean,diff(c(0,Tmu$end)))
 
+
   result$Tmu= Tmu
   result$SSwg=out$J.est
   result$mean.est.t = mean.est.t
+  result$breaks=out$t.est
+
   return(result)
 }
 
