@@ -6,8 +6,8 @@
 #' @param lyear the length of the year in the signal. Defalut is 365.25
 #' @param lmin the minimum length of the segments. Default is 1
 #' @param Kmax the maximal number of segments (must be lower than n). Default is [n/2 log(n)]
-#' @param selection.K a name indicating the model selection criterion to select the number of segments K (\code{mBIC}, \code{ML}, \code{BM_BJ} or \code{BM_slope}). \code{"none"} indicates that no selection is claimed and the procedure considers \code{Kmax} segments or \code{Kmax}-1 changes. If \code{selection.K="All"}, the results for the four possible criteria are given. Default is \code{"mBIC"}
-#' @param S the threshold used in the ML criterion. Default is 0.75
+#' @param selection.K a name indicating the model selection criterion to select the number of segments K (\code{mBIC}, \code{Lav}, \code{BM_BJ} or \code{BM_slope}). \code{"none"} indicates that no selection is claimed and the procedure considers \code{Kmax} segments or \code{Kmax}-1 changes. If \code{selection.K="All"}, the results for the four possible criteria are given. Default is \code{"mBIC"}
+#' @param S the threshold used in the Lav criterion. Default is 0.75
 #' @param f a boolean indicating if the functional part is taking into account for in the model. Default is FALSE
 #' @param selection.f a boolean indicating if a selection on the functions of the Fourier decomposition of order 4 is performed. Default is FALSE
 #' @param threshold a numeric value lower than 1. Default is 0.05
@@ -26,7 +26,7 @@
 #'
 #' @details
 #' The function performs homogeneization of GNSS series. The considered model is a segmentation in the mean model (detection of abrupt changes model) in which a functional part is added and with heterogeneous variances on fixed intervals. On GNSS series, the latter intervals corresponds to the month.
-#' The inference procedure consists for a fixed number of segments K in first estimating robustly the variances and second estimating the segmentation and the functional parts using an iterative procedure. The solution is obtained for k=1,...,\code{Kmax} segments. Then the "best k" is chosen using model selection criteria. The possible criteria are \code{mBIC} the modified BIC criterion REFEREF, \code{ML} the criterion proposed by REFEF, \code{BM_BJ} and \code{BM_slope} the criteria proposed by REFEF where the penalty constant is calibrated using the Biggest Jump and the slope respectively REFERF.
+#' The inference procedure consists for a fixed number of segments K in first estimating robustly the variances and second estimating the segmentation and the functional parts using an iterative procedure. The solution is obtained for k=1,...,\code{Kmax} segments. Then the "best k" is chosen using model selection criteria. The possible criteria are \code{mBIC} the modified BIC criterion REFEREF, \code{Lav} the criterion proposed by REFEF, \code{BM_BJ} and \code{BM_slope} the criteria proposed by REFEF where the penalty constant is calibrated using the Biggest Jump and the slope respectively REFERF.
 #' \itemize{
 #' \item The data is a data frame with 2 columns: $signal is the signal to be homogeneized (a daily series) and $date is the date. The date will be in format yyyy-mm-dd of type "calendar time" (class POSIXct).
 #' \item The function part is estimated using a Fourier decomposition of order 4 with \code{selection.f=FALSE}. \code{selection.f=TRUE} consists in selecting twice functions of the Fourier decomposition of order 4, first by using a stepwise procedure using AIC and second by considering among them the signficative ones (for which p.values are lower than \code{threshold})
@@ -132,7 +132,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
           mBIC=NULL
           }
 
-        if (selection.K=="ML"){
+        if (selection.K=="Lav"){
           res.LoopK=loop.iterative.procedure(Data.X,lyear,lmin,Kmax,Used.function,threshold,tol)
           loglik=res.LoopK$loglik
           Kh=MLcriterion(res.LoopK$SSwg, Kseq,S)
@@ -229,7 +229,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
 
           #2=ML
           Kh.ML=MLcriterion(res.LoopK$SSwg, Kseq,S)
-          Kh$ML=Kh.ML
+          Kh$Lav=Kh.ML
           if (Kh.ML==Kh.mBIC){
             res.segfunct.ML=res.segfunct.mBIC
           } else{
@@ -238,8 +238,8 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
             eval(parse(text=request))
             res.segfunct.ML<- add_NA(res.segfunct,n.Data,present.data)
           }
-          Tmu$ML=res.segfunct.ML$Tmu
-          fh$ML=res.segfunct.ML$f
+          Tmu$Lav=res.segfunct.ML$Tmu
+          fh$Lav=res.segfunct.ML$f
 
           #3=BM_BJ
           pen=5*Kseq+2*Kseq*log(n.X/Kseq)
@@ -313,7 +313,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
             mBIC=NULL
           }
 
-          if (selection.K=="ML"){
+          if (selection.K=="Lav"){
             res.seg=c()
             res.seg=SegMonthlyVarianceK(Data.X,Kmax,lmin,var.est.t)
             varh=sigma.est.month^2
@@ -421,7 +421,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
 
             #2=ML
             Kh.ML=MLcriterion(res.seg$SSwg, Kseq,S)
-            Kh$ML=Kh.ML
+            Kh$Lav=Kh.ML
             if (Kh.ML==Kh.mBIC){
               res.seg.ML=res.seg.mBIC
             } else{
@@ -430,8 +430,8 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
               res.seg.temp$f=rep(0,n.X)
               res.seg.ML<- add_NA(res.seg.temp,n.Data,present.data)
             }
-            Tmu$ML=res.seg.ML$Tmu
-            fh$ML=res.seg.ML$f
+            Tmu$Lav=res.seg.ML$Tmu
+            fh$Lav=res.seg.ML$f
 
             #3=BM_BJ
             pen=5*Kseq+2*Kseq*log(n.X/Kseq)
