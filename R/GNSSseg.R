@@ -44,7 +44,7 @@
 #' plot_GNSS(Data,result$segmentation,result$functional)
 #' @export
 
-GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=TRUE,selection.f=FALSE,threshold=0.05,tol=1e-4){
+GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TRUE,selection.f=FALSE,threshold=0.05,tol=1e-4){
   result  = list()
   Data.X  = c()
   cond1=TRUE
@@ -171,7 +171,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
           res.LoopK=loop.iterative.procedure(Data.X,lyear,lmin,Kmax,Used.function,threshold,tol)
           loglik=res.LoopK$loglik
           pen=5*Kseq+2*Kseq*log(n.X/Kseq)
-          KK=min(20,Kmax)
+          KK=min(40,Kmax)
           DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.LoopK$SSwg[1:KK])
           Kh=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
           res.segfunct=c()
@@ -259,7 +259,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=NULL,selection.K="mBIC",S=0.75,f=
           fh$BM_BJ=res.segfunct.BM_BJ$f
 
           #4=BM2
-          KK=min(20,Kmax)
+          KK=min(40,Kmax)
           DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.LoopK$SSwg[1:KK])
           Kh.BM_slope=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
           Kh$BM_slope=Kh.BM_slope
