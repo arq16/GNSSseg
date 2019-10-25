@@ -171,7 +171,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
           res.LoopK=loop.iterative.procedure(Data.X,lyear,lmin,Kmax,Used.function,threshold,tol)
           loglik=res.LoopK$loglik
           pen=5*Kseq+2*Kseq*log(n.X/Kseq)
-          KK=min(40,Kmax)
+          KK=Kmax
           DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.LoopK$SSwg[1:KK])
           Kh=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
           res.segfunct=c()
@@ -259,7 +259,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
           fh$BM_BJ=res.segfunct.BM_BJ$f
 
           #4=BM2
-          KK=min(40,Kmax)
+          KK=Kmax
           DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.LoopK$SSwg[1:KK])
           Kh.BM_slope=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
           Kh$BM_slope=Kh.BM_slope
@@ -354,7 +354,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
             varh=sigma.est.month^2
             loglik=-(n.X/2)*(log(2*pi))-(1/2)*(sum(log(var.est.t)))-(1/2)*res.seg$SSwg
             pen=5*Kseq+2*Kseq*log(n.X/Kseq)
-            KK=min(20,Kmax)
+            KK=Kmax
             DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.seg$SSwg[1:KK])
             Kh=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
             res.seg=c()
@@ -451,7 +451,7 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
             fh$BM_BJ=res.seg.BM_BJ$f
 
             #4=BM2
-            KK=min(20,Kmax)
+            KK=Kmax
             DataForCa=data.frame(model=paste("K=",Kseq[1:KK]),pen=pen[1:KK],complexity=Kseq[1:KK],contrast=res.seg$SSwg[1:KK])
             Kh.BM_slope=Kseq[which(capushe::DDSE(DataForCa)@model==DataForCa$model)]
             Kh$BM_slope=Kh.BM_slope
