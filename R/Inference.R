@@ -19,7 +19,7 @@ loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,thresho
     LogLg[k] =  apply(seg,1,FUN=function(z) sum(log(diff(c(0,z))[diff(c(0,z))>0])))
   }
   result$SSwg=SSwg
-  #result$SSall=SSall
+  result$SSall=SSall
   result$loglik=loglik
   result$LogLg=LogLg
   return(result)
