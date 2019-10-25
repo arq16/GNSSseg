@@ -21,11 +21,7 @@
 #' \item \code{loglik} that corresponds to the log-likelihood for k=1,...,\code{Kmax}. If \code{selection.K="none"}, it contains only the log-likelihood for \code{Kmax} segments
 #' \item \code{variances} that corresponds to the estimated variances for each fixed interval (e.g. the months).
 #' \item \code{mBIC} that corresponds to the values of the mBIC criterion for k=1,...,\code{Kmax} if it is required (\code{selection.K="mBIC"} or \code{selection.K="All"})
-#' \item \code{SSwg}
-#' \item \code{SSall}
-#' \item \code{LogLg}
-#' \item \code{iter}
-#' }  
+#' }
 #' If \code{selection.K="All"}, the outputs \code{selected.K}, \code{segmentation} and \code{functional} are each a list containing the corresponding result for the four model selection criteria
 #'
 #' @details
@@ -291,12 +287,6 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
         result$loglik=loglik
         result$variances=varh
         result$mBIC=mBIC
-        result$iter=iter
-        result$SSwg=SSwg
-        result$SSall=SSall
-        result$LogLg=LogLg
-        
-        
         return(result)
         } else {
 
@@ -489,12 +479,6 @@ GNSSseg=function(Data,lyear=365.25,lmin=1,Kmax=40,selection.K="mBIC",S=0.75,f=TR
           result$loglik=loglik
           result$variances=varh
           result$mBIC=mBIC
-          result$iter=iter
-          result$SSwg=SSwg
-          result$SSall=SSall
-          result$LogLg=LogLg
-          
-          
           return(result)
         }
   }

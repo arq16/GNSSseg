@@ -17,13 +17,11 @@ loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,thresho
     loglik[k]=-(n/2)*(log(2*pi))-(1/2)*(sum(log(res.segfunct$var.est.t)))-(1/2)*SSwg[k]
     seg       = matrix(res.segfunct$Tmu$end,ncol=k,nrow=1)
     LogLg[k] =  apply(seg,1,FUN=function(z) sum(log(diff(c(0,z))[diff(c(0,z))>0])))
-    iter[k] = res.segfunct$iter
-    }
+  }
   result$SSwg=SSwg
   result$SSall=SSall
   result$loglik=loglik
   result$LogLg=LogLg
-  result$iter=iter
   return(result)
 }
 
