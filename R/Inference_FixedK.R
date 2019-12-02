@@ -394,10 +394,7 @@ periodic_estimation_selb=function(Data,var.est.t,lyear,threshold=0.05){
 periodic_estimation_selb_init=function(Data,var.est.t,lyear,threshold=0.05){
   DataF=Data
   DataF$t=c(as.numeric(DataF$date-DataF$date[1]))/86400
-<<<<<<< HEAD
   num.col=dim(DataF)[2]
-=======
->>>>>>> 4ace34b9b49c37eea7aa84ca165373d979ab7f81
   for (i in 1:4){
     cosX=cos(i*DataF$t*(2*pi)/lyear)
     sinX=sin(i*DataF$t*(2*pi)/lyear)
