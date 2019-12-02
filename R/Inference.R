@@ -1,29 +1,18 @@
 
 ###################################
 # General Loop
-loop.iterative.procedure = function(Data,lyear,lmin=1,Kmax,Used.function,threshold,tol){
+Loop.K.procedure = function(Data,var.est.month,lyear,lmin=1,Kmax,Used.function,threshold,tol){
   result  = list()
   n       = dim(Data)[1]
-  SSwg    = c()
-  loglik  = c()
-  LogLg   = c()
-
-  for (k in (1:Kmax)){
+  #Iterative procedure
+  result=lapply(1:Kmax, function(i){
     res.segfunct=c()
-    request=paste(paste0("res.segfunct=",Used.function,'(Data,k,lmin,lyear,threshold,tol)'),sep="")
+    request=paste(paste0("res.segfunct=",Used.function,'(Data,var.est.month,i,lmin,lyear,threshold,tol)'),sep="")
     eval(parse(text=request))
-    SSwg[k]=res.segfunct$SSwg
-    #SSall[k]=res.segfunct$SSwg[1]
-    loglik[k]=-(n/2)*(log(2*pi))-(1/2)*(sum(log(res.segfunct$var.est.t)))-(1/2)*SSwg[k]
-    seg       = matrix(res.segfunct$Tmu$end,ncol=k,nrow=1)
-    LogLg[k] =  apply(seg,1,FUN=function(z) sum(log(diff(c(0,z))[diff(c(0,z))>0])))
-  }
-  result$SSwg=SSwg
-  #result$SSall=SSall
-  result$loglik=loglik
-  result$LogLg=LogLg
+  })
   return(result)
 }
+
 
 
 ###################################

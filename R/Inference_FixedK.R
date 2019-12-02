@@ -1,12 +1,9 @@
 
 ###################################
 ######## Inference procedure for a fixed K
-Seg_funct_totK <-function(Data,K,lmin,lyear,threshold,tol){
-  sigma.est.month=RobEstiMonthlyVariance(Data)
-  var.est.k=sigma.est.month^2
-  var.est.t=c()
-  var.est.t=var.est.k[as.numeric(Data$month)]
-
+Seg_funct_totK <-function(Data,var.est.month,K,lmin,lyear,threshold,tol){
+  var.est.t=var.est.month[as.numeric(Data$month)]
+  
   period=periodic_estimation_tot_init(Data,var.est.t,lyear)
   auxiliar_data <- Data
   auxiliar_data$signal=Data$signal-period$predict
@@ -51,23 +48,21 @@ Seg_funct_totK <-function(Data,K,lmin,lyear,threshold,tol){
     segmentation=segmi
   }
 
-  segmK=list()
-  segmK$Tmu = segmi$Tmu
-  segmK$SSwg=segmi$SSwg[K]
-  segmK$var.est.t=var.est.t
-  segmK$sigma.est.month=sigma.est.month
-  segmK$f=periodi$predict
+  
+  segmK=c()
+  segmK$Tmu   = segmentation$Tmu
+  segmK$SSwg  = segmentation$SSwg[K]
+  segmK$LogLg = segmentation$LogLg[K]
+  segmK$f     = period$predict
+  segmK$coeff = period$coeff
   return(segmK)
 
 }
 
 
-Seg_funct_selbK <-function(Data,K,lmin=1,lyear,threshold,tol){
-  sigma.est.month=RobEstiMonthlyVariance(Data)
-  var.est.k=sigma.est.month^2
-  var.est.t=c()
-  var.est.t=var.est.k[as.numeric(Data$month)]
-
+Seg_funct_selbK <-function(Data,var.est.month,K,lmin=1,lyear,threshold,tol){
+  var.est.t=var.est.month[as.numeric(Data$month)]
+  
   period=periodic_estimation_selb_init(Data,var.est.t,lyear,threshold)
   auxiliar_data <- Data
   auxiliar_data$signal=Data$signal-period$predict
@@ -113,12 +108,13 @@ Seg_funct_selbK <-function(Data,K,lmin=1,lyear,threshold,tol){
 
   }
 
-  segmK=list()
-  segmK$Tmu = segmi$Tmu
-  segmK$SSwg=segmi$SSwg[K]
-  segmK$var.est.t=var.est.t
-  segmK$sigma.est.month=sigma.est.month
-  segmK$f=periodi$predict
+  
+  segmK=c()
+  segmK$Tmu   = segmentation$Tmu
+  segmK$SSwg  = segmentation$SSwg[K]
+  segmK$LogLg = segmentation$LogLg[K]
+  segmK$f     = period$predict
+  segmK$coeff = period$coeff
   return(segmK)
 
 }
@@ -153,11 +149,11 @@ SegMonthlyVarianceK=function(Data,K,lmin,var.est.t){
   Tmu=FormatOptSegK(out$t.est[K,1:K],Data,var.est.t)
   mean.est.t  = rep(Tmu$mean,diff(c(0,Tmu$end)))
 
-
   result$Tmu= Tmu
-  result$SSwg=out$J.est
+  result$res.LoopK=out
   result$mean.est.t = mean.est.t
-  result$breaks=out$t.est
+  result$SSwg=out$J.est
+  result$LogLg=apply(out$t.est,1,FUN=function(z) sum(log(diff(c(0,z))[diff(c(0,z))>0])))
 
   return(result)
 }
@@ -317,8 +313,6 @@ FormatOptSegK <- function(breakpointsK,Data,v){
 periodic_estimation_tot=function(Data,var.est.t,lyear){
   DataF=Data
   DataF$t=c(as.numeric(DataF$date-DataF$date[1]))/86400
-  #DataF$t=DataF$date-mean(DataF$date)
-
   for (i in 1:4){
     cosX=cos(i*DataF$t*(2*pi)/lyear)
     sinX=sin(i*DataF$t*(2*pi)/lyear)
@@ -326,9 +320,10 @@ periodic_estimation_tot=function(Data,var.est.t,lyear){
     colnames(DataF)[(dim(DataF)[2]-1):(dim(DataF)[2])]=c(paste0('cos',i),paste0('sin',i))
   }
   reg=stats::lm(signal~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4,weights=1/var.est.t,data=DataF)
-  coef=base::summary(reg)$coefficients[,1]
+  coeff=base::summary(reg)$coefficients[,1]
   result=list()
   result$predict=stats::predict(reg,DataF)
+  result$coeff=coeff
   return(result)
 }
 
@@ -336,7 +331,6 @@ periodic_estimation_tot=function(Data,var.est.t,lyear){
 periodic_estimation_tot_init=function(Data,var.est.t,lyear){
   DataF=Data
   DataF$t=c(as.numeric(DataF$date-DataF$date[1]))/86400
-  #DataF$t=DataF$date-mean(DataF$date)
   for (i in 1:4){
     cosX=cos(i*DataF$t*(2*pi)/lyear)
     sinX=sin(i*DataF$t*(2*pi)/lyear)
@@ -344,16 +338,18 @@ periodic_estimation_tot_init=function(Data,var.est.t,lyear){
     colnames(DataF)[(dim(DataF)[2]-1):(dim(DataF)[2])]=c(paste0('cos',i),paste0('sin',i))
   }
   reg=stats::lm(signal~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4,data=DataF)
-  coef=base::summary(reg)$coefficients[,1]
+  coeff=base::summary(reg)$coefficients[,1]
   result=list()
   result$predict=stats::predict(reg,DataF)
+  result$coeff=coeff
   return(result)
 }
+
 
 periodic_estimation_selb=function(Data,var.est.t,lyear,threshold=0.05){
   DataF=Data
   DataF$t=c(as.numeric(DataF$date-DataF$date[1]))/86400
-  #DataF$t=DataF$date-mean(DataF$date)
+  num.col=dim(DataF)[2]
   for (i in 1:4){
     cosX=cos(i*DataF$t*(2*pi)/lyear)
     sinX=sin(i*DataF$t*(2*pi)/lyear)
@@ -361,72 +357,81 @@ periodic_estimation_selb=function(Data,var.est.t,lyear,threshold=0.05){
     colnames(DataF)[(dim(DataF)[2]-1):(dim(DataF)[2])]=c(paste0('cos',i),paste0('sin',i))
   }
   reg=stats::lm(signal~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4,weights=1/var.est.t,data=DataF)
-  reg0=stats::lm(signal~-1,weights=1/var.est.t,data=DataF)
-  reg.select=stats::step(reg0, scope=~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4, direction = c("both"),trace=0)
-  Selected_coeff=base::summary(reg.select)$coefficients
-  names.sel=rownames(Selected_coeff)
-  rg=which(Selected_coeff[,4]<threshold)
-  coef=c()
-  if (length(rg)>=1){
-    coeff_Selected=Selected_coeff[rg,]
-    names_Selected=names.sel[rg]
-    X.design=as.matrix(DataF[,which(colnames(DataF) %in%  names_Selected )])
-    Y=as.vector(DataF$signal)
-    W=diag(1/var.est.t)
-    coeff=solve(t(X.design)%*%W%*%X.design)%*%(t(X.design)%*%W%*%Y)
-    pred=as.numeric(X.design%*%coeff)
-    a=as.data.frame(coeff[,1])
-    # rownames(a)=names_Selected
-  }else{
-    pred=c()
-    pred=rep(0,length(DataF$signal))
-    # names_Selected=c("no coeff")
+  res.coeff=summary(reg)$coefficients
+  names.coeff=rownames(res.coeff)
+  #Selection of significant coefficients
+  rg=which(res.coeff[,4]<threshold)
 
+  if (length(rg)>=1){
+    names.Selected=names.coeff[rg]
+    n.Selected=length(names.Selected)
+    DataFF=DataF[,c(1:num.col,which(colnames(DataF) %in%  names.Selected ))] 
+    if (n.Selected >=2){
+      a=names.Selected[1]
+      for (i in 1:(n.Selected-1)){
+      a=paste(a,names.Selected[i+1],sep="+")
+      }
+      } else {
+      a=names.Selected[1]
+      }
+    request=paste(paste0("reg.Selected=stats::lm(signal~-1+",a,",weights=1/var.est.t,data=DataFF)"),sep="")
+    eval(parse(text=request))
+    pred=reg.Selected$fitted.values
+    coeff=reg.Selected$coefficients
+  } else {
+    pred=rep(0,length(DataF$signal))
+    coeff=0
+    names(coeff)="no selected coeff"
   }
   result=list()
   result$predict=pred
-  #result$funct.select=names_Selected
+  result$coeff=coeff
   return(result)
 }
-
+  
+  
 
 periodic_estimation_selb_init=function(Data,var.est.t,lyear,threshold=0.05){
   DataF=Data
   DataF$t=c(as.numeric(DataF$date-DataF$date[1]))/86400
-  #DataF$t=DataF$date-mean(DataF$date)
+  num.col=dim(DataF)[2]
   for (i in 1:4){
     cosX=cos(i*DataF$t*(2*pi)/lyear)
     sinX=sin(i*DataF$t*(2*pi)/lyear)
     DataF=cbind(DataF,cosX,sinX)
     colnames(DataF)[(dim(DataF)[2]-1):(dim(DataF)[2])]=c(paste0('cos',i),paste0('sin',i))
   }
+  
+  
   reg=stats::lm(signal~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4,data=DataF)
-  reg0=stats::lm(signal~-1,data=DataF)
-  reg.select=stats::step(reg0, scope=~-1+cos1+sin1+cos2+sin2+cos3+sin3+cos4+sin4, direction = c("both"),trace=0)
-  Selected_coeff=base::summary(reg.select)$coefficients
-  names.sel=rownames(Selected_coeff)
-  rg=which(Selected_coeff[,4]<threshold)
-  coef=c()
+  res.coeff=summary(reg)$coefficients
+  names.coeff=rownames(res.coeff)
+  #Selection of significant coefficients
+  rg=which(res.coeff[,4]<threshold)
+  
   if (length(rg)>=1){
-    coeff_Selected=Selected_coeff[rg,]
-    names_Selected=names.sel[rg]
-    X.design=as.matrix(DataF[,which(colnames(DataF) %in%  names_Selected )])
-    Y=as.vector(DataF$signal)
-    coeff=solve(t(X.design)%*%X.design)%*%(t(X.design)%*%Y)
-    pred=X.design%*%coeff
-    a=as.data.frame(coeff[,1])
-    rownames(a)=names_Selected
-    coef=a[,1]
-  }else{
-    coef=c()
-    pred=c()
+    names.Selected=names.coeff[rg]
+    n.Selected=length(names.Selected)
+    DataFF=DataF[,c(1:num.col,which(colnames(DataF) %in%  names.Selected ))] 
+    if (n.Selected >=2){
+      a=names.Selected[1]
+      for (i in 1:(n.Selected-1)){
+        a=paste(a,names.Selected[i+1],sep="+")
+      }
+    } else {
+      a=names.Selected[1]
+    }
+    request=paste(paste0("reg.Selected=stats::lm(signal~-1+",a,",data=DataFF)"),sep="")
+    eval(parse(text=request))
+    pred=reg.Selected$fitted.values
+    coeff=reg.Selected$coefficients
+  } else {
     pred=rep(0,length(DataF$signal))
-    names_Selected=c("no coeff")
-
+    coeff=0
+    names(coeff)="no selected coeff"
   }
   result=list()
-  result$coef=coef
   result$predict=pred
-  result$funct.select=names_Selected
+  result$coeff=coeff
   return(result)
 }

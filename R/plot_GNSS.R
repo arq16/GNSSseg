@@ -22,6 +22,7 @@
 plot_GNSS=function(Data,segmentation,functional){
   graphics::plot(Data$date,Data$signal,cex=0.7,type="l",col="#009999",xlab="date",ylab="signal")
   mean.est.t  = rep(segmentation$mean,diff(c(0,segmentation$end)))
+  if (functional==FALSE) {functional=0}
   average=mean.est.t+functional
   graphics::lines(Data$date,average,col="red")
   graphics::abline(v=Data$date[segmentation$end],col="red")
